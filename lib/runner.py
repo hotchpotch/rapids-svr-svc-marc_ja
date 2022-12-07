@@ -90,8 +90,11 @@ def _get_emb_with_cache(
         return embs
     else:
         print(f"[create cache] {cache_path}")
+        start_time = time.time()
         embs = _get_emb(emb_config, train_df, valid_df, debug=debug)
         joblib.dump(embs, cache_path)
+        end_time = time.time()
+        print(f"exec time: {end_time - start_time:.2f} sec")
         print("shape:", embs[0].shape, embs[1].shape)
         return embs
 
@@ -114,8 +117,8 @@ def run(emb_names: list[str], marc_dir: str, debug: bool = False):
         train_embs.append(train_emb)
         valid_embs.append(valid_emb)
 
-    train_embs = np.concatenate(train_embs, axis=1)
-    valid_embs = np.concatenate(valid_embs, axis=1)
+    train_embs = np.concatenate(train_embs, axis=1).astype("float32")
+    valid_embs = np.concatenate(valid_embs, axis=1).astype("float32")
     print("concat embs:", train_embs.shape, valid_embs.shape)
 
     print("[train svc]")

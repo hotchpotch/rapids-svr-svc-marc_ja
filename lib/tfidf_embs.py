@@ -1,5 +1,5 @@
 """
-tfidf から次元圧縮した特徴量を取得する
+tfidf から次元削減した特徴量を取得する
 """
 
 import fugashi
@@ -16,7 +16,7 @@ def _create_vectorizer(text, min_df=2):
     return vectorizer
 
 
-def _create_svd(vect, n_components=1000):
+def _create_svd(vect, n_components):
     svd = TruncatedSVD(n_components=n_components)
     svd.fit(vect)
     return svd

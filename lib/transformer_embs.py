@@ -145,6 +145,7 @@ def get_transformer_embs(
         )
         emb = _get_embs_fn(loader, model, device)
         embs.append(emb)
+    del model
     return embs
 
 
