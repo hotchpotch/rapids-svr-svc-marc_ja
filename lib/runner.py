@@ -17,7 +17,6 @@ from rapids_svc import train_svc
 
 
 EMBS_PATH = Path(__file__).parent.parent / "embs"
-print(EMBS_PATH)
 EMBS_FILES = [f.name for f in EMBS_PATH.glob("*.yaml")]
 
 
@@ -45,9 +44,25 @@ def _get_emb(
     valid_df: pd.DataFrame,
     debug: bool = False,
 ):
-    # if emb_config["type"] == "tfidf":
-    #     pass
-    print(emb_config)
+    train_texts = train_df.sentence.tolist()  # type: ignore
+    valid_texts = valid_df.sentence.tolist()  # type: ignore
+    config = dict(emb_config)
+    type = config.pop("type")
+    if type == "tfidf":
+        embs = get_tfidf_embs([train_texts, valid_texts], **config)
+        return embs
+    elif type == "transformer":
+        model_name = config.pop("model_name")
+        tokenizer_class_name = config.pop("tokenizer", None)
+        embs = get_transformer_embs(
+            [train_texts, valid_texts],
+            model_name=model_name,  # type: ignore
+            tokenizer_class_name=tokenizer_class_name,  # type: ignore
+            **config,
+        )
+        return embs
+    else:
+        raise ValueError(f"'{type}' はありません")
 
 
 def run(emb_names: list[str], marc_dir: str, debug: bool = False):
@@ -56,6 +71,7 @@ def run(emb_names: list[str], marc_dir: str, debug: bool = False):
     if debug:
         train_df = train_df.sample(n=1000, random_state=42)
         valid_df = valid_df.sample(n=200, random_state=42)
+        print("[debug] shape size:", train_df.shape, valid_df.shape)
 
     embs = []
     for emb_name in emb_names:

@@ -6,11 +6,14 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import AutoTokenizer, AutoModel, DataCollatorWithPadding  # type: ignore
+import transformers
+from transformers import logging, AutoTokenizer, AutoModel, DataCollatorWithPadding  # type: ignore
 import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 import numpy as np
+
+logging.set_verbosity_error()
 
 
 class MeanPooling(nn.Module):
@@ -116,7 +119,7 @@ _DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def get_transformer_embs(
     texts: list[list[str]],
     model_name: str,
-    tokenizer_class=AutoTokenizer,
+    tokenizer_class_name: str | None = None,
     batch_size=32,
     max_len=512,
     device=_DEVICE,
@@ -124,6 +127,10 @@ def get_transformer_embs(
 ):
     embs = []
     model = TransformerEmbsModel(model_name, pooling)
+    if tokenizer_class_name is None:
+        tokenizer_class = AutoTokenizer
+    else:
+        tokenizer_class = getattr(transformers, tokenizer_class_name)
     tokenizer = tokenizer_class.from_pretrained(model_name)
     for text in texts:
         dataset = TextDataset(text, tokenizer, max_len)
