@@ -1,6 +1,7 @@
 from __future__ import annotations
 import argparse
 from pathlib import Path
+import joblib
 
 import pandas as pd
 import yaml
@@ -18,6 +19,9 @@ from rapids_svc import train_svc
 
 EMBS_PATH = Path(__file__).parent.parent / "embs"
 EMBS_FILES = [f.name for f in EMBS_PATH.glob("*.yaml")]
+CACHE_PATH = Path(__file__).parent.parent / "tmp/embs_cache"
+if not CACHE_PATH.exists():
+    CACHE_PATH.mkdir(parents=True)
 
 
 def _get_emb_config(emb_name: str) -> dict[str, object]:
@@ -65,6 +69,29 @@ def _get_emb(
         raise ValueError(f"'{type}' はありません")
 
 
+def _get_emb_with_cache(
+    cache_key: str,
+    emb_config: dict[str, object],
+    train_df: pd.DataFrame,
+    valid_df: pd.DataFrame,
+    debug: bool = False,
+):
+    if debug:
+        cache_key = f"debug_{cache_key}"
+    cache_path = CACHE_PATH / f"{cache_key}.pkl.gz"
+    if cache_path.exists():
+        print(f"[load cache] {cache_path}")
+        embs = joblib.load(cache_path)
+        print("shape:", embs[0].shape, embs[1].shape)
+        return embs
+    else:
+        print(f"[create cache] {cache_path}")
+        embs = _get_emb(emb_config, train_df, valid_df, debug=debug)
+        joblib.dump(embs, cache_path)
+        print("shape:", embs[0].shape, embs[1].shape)
+        return embs
+
+
 def run(emb_names: list[str], marc_dir: str, debug: bool = False):
     train_df, valid_df = _get_marc_df(marc_dir)
 
@@ -76,7 +103,7 @@ def run(emb_names: list[str], marc_dir: str, debug: bool = False):
     embs = []
     for emb_name in emb_names:
         emb_config = _get_emb_config(emb_name)
-        emb = _get_emb(emb_config, train_df, valid_df, debug=debug)
+        emb = _get_emb_with_cache(emb_name, emb_config, train_df, valid_df, debug=debug)
         embs.append(emb)
 
 
