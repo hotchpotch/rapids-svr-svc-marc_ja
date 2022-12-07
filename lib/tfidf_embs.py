@@ -27,7 +27,7 @@ def get_tfidf_embs(texts, min_df=2, n_components=1000, target_pos=TARGET_POS):
 
     def preprocess_text(text):
         return " ".join(
-            [w.surface for w in tagger(text) if w.feature.pos1 in TARGET_POS]
+            [w.surface for w in tagger(text) if w.feature.pos1 in target_pos]
         )
 
     # 前処理

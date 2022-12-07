@@ -1,0 +1,4 @@
+type: transformer
+model_name: cl-tohoku/bert-base-japanese-v2
+max_len: 512
+pooling: cls

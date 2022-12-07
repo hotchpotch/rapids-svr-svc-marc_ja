@@ -1,0 +1,5 @@
+type: transformer
+model_name: rinna/japanese-roberta-base
+max_len: 512
+pooling: cls
+tokenizer: T5Tokenizer
