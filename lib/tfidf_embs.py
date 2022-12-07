@@ -32,6 +32,7 @@ def get_tfidf_embs(texts, min_df=2, n_components=1000, target_pos=TARGET_POS):
 
     # 前処理
     texts = [list(map(preprocess_text, text)) for text in texts]
+    # texts[0] を fit させるデータとして使う
     text = texts[0]
     vectorizer = _create_vectorizer(text, min_df=min_df)
     svd = _create_svd(vectorizer.transform(text), n_components=n_components)
