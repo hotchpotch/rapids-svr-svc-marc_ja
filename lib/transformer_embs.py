@@ -94,8 +94,22 @@ class TextDataset(Dataset):
 
     def __getitem__(self, item):
         text = self.texts[item]
-        inputs = self.prepare_input(text)
-        return inputs
+        try:
+            inputs = self.prepare_input(text)
+            return inputs
+        except (ValueError, IndexError):
+            # jumanppのtokenizerで特定の文章でエラーが出るので、その対策
+            orig_text = "" + text
+            while True:
+                try:
+                    inputs = self.prepare_input(text)
+                    return inputs
+                except (ValueError, IndexError):
+                    min_text_len = int(len(text) * 0.9)
+                    text = text[:min_text_len]
+                    if len(text) == 0:
+                        break
+            raise ValueError(f"cannot tokenize: {orig_text}")
 
 
 @torch.inference_mode()
@@ -134,6 +148,8 @@ def get_transformer_embs(
     tokenizer = tokenizer_class.from_pretrained(model_name)
     for text in texts:
         dataset = TextDataset(text, tokenizer, max_len)
+        # for d in tqdm(dataset, total=len(dataset)):
+        #     pass
         loader = DataLoader(
             dataset,
             batch_size=batch_size,

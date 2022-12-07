@@ -1,0 +1,4 @@
+type: transformer
+model_name: nlp-waseda/roberta-large-japanese-seq512-with-auto-jumanpp
+max_len: 512
+pooling: mean
