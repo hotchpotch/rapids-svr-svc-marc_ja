@@ -20,7 +20,9 @@ def train_svc(
     X: np.ndarray,
     y: np.ndarray,
     svc_params: dict[str, object] = DEFAULT_SVC_PARAMS,
+    probability: bool = True,
 ) -> SVC:
     svc = SVC(**svc_params)
+    svc.probability = probability
     svc.fit(X, y)
     return svc

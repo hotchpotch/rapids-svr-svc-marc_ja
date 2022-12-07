@@ -4,7 +4,11 @@ from pathlib import Path
 import joblib
 
 import pandas as pd
+import numpy as np
 import yaml
+import time
+
+from sklearn.metrics import classification_report, accuracy_score
 
 # add system path
 import sys
@@ -100,11 +104,44 @@ def run(emb_names: list[str], marc_dir: str, debug: bool = False):
         valid_df = valid_df.sample(n=200, random_state=42)
         print("[debug] shape size:", train_df.shape, valid_df.shape)
 
-    embs = []
+    train_embs = []
+    valid_embs = []
     for emb_name in emb_names:
         emb_config = _get_emb_config(emb_name)
-        emb = _get_emb_with_cache(emb_name, emb_config, train_df, valid_df, debug=debug)
-        embs.append(emb)
+        train_emb, valid_emb = _get_emb_with_cache(
+            emb_name, emb_config, train_df, valid_df, debug=debug
+        )
+        train_embs.append(train_emb)
+        valid_embs.append(valid_emb)
+
+    train_embs = np.concatenate(train_embs, axis=1)
+    valid_embs = np.concatenate(valid_embs, axis=1)
+    print("concat embs:", train_embs.shape, valid_embs.shape)
+
+    print("[train svc]")
+    start_svc = time.time()
+    svc = train_svc(train_embs, train_df.label.cat.codes)  # type: ignore
+    valid_preds = svc.predict(valid_embs)
+    end_svc = time.time()
+    print(f"svc exec time: {end_svc - start_svc:.2f} sec")
+    del svc  # for free
+
+    print("=" * 50)
+    if debug:
+        print("[DEBUG]")
+    print(" + ".join(emb_names))
+    # acc = accuracy_score(valid_df.label.cat.codes, valid_preds)
+    acc = (valid_df.label.cat.codes == valid_preds).sum() / len(valid_preds)
+    print("valid acc score:", acc)
+    print("=" * 50)
+
+    report_text = classification_report(
+        valid_df.label.cat.codes,
+        valid_preds,
+        digits=5,
+        target_names=["positive", "negative"],
+    )
+    print(report_text)
 
 
 if __name__ == "__main__":
