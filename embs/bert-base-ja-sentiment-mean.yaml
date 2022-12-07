@@ -1,0 +1,4 @@
+type: transformer
+model_name: daigo/bert-base-japanese-sentiment
+max_len: 512
+pooling: mean
