@@ -36,6 +36,7 @@ class MeanPooling(nn.Module):
 
 
 class ClsPooling(nn.Module):
+    # 実際は Pooling ではなくただの CLS を取り出しているだけなので、このクラス名は良くない…
     def __init__(self):
         super(ClsPooling, self).__init__()
 
