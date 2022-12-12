@@ -1,0 +1,5 @@
+transformers
+tokenizers
+sentencepiece
+unidic-lite
+fugashi
