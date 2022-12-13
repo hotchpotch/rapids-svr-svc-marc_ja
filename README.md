@@ -1,8 +1,8 @@
 # rapids-svr-svc-marc_ja
 
-各種モデルをfinetune無しにRAPIDS SVCで学習した[JGLUE](https://github.com/yahoojapan/JGLUE)のMARC-jaja の結果とその実装。日本語での解説記事はこちら。
+各種モデルをfinetune無しにRAPIDS SVCで学習した[JGLUE](https://github.com/yahoojapan/JGLUE)のMARC-ja の評価結果とその実装。日本語での解説記事は[こちら](https://secon.dev/entry/2022/12/13/090000-rapids-svr-svc-marc-ja/)。
 
-- https://secon.dev/entry/2022/12/12/100000/
+- https://secon.dev/entry/2022/12/13/090000-rapids-svr-svc-marc-ja/
 
 ## スコア
 
